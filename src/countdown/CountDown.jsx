@@ -1,39 +1,54 @@
-import React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from "react";
 
-function CountDown() {
-    // targetSeconds (cantidad de segundos elegidos), Elapsedseconds (segundos que han pasado)
+function Countdown(){
+  let [targetSeconds, setTargetSeconds] = useState(null);
 
-    let [targetSeconds, SetTargetSeconds] = useState(null);
-    let [elapsedSeconds, setElapsedSeconds] = useState(0);
+  let [seconds, setSeconds] = useState(0);
 
-    function parseForm(ev){
-        //prevengo el funcionamiento por default del evento
-        ev.preventDefault();
-        // leer la informacion que tiene este input
-        let seconds = ev.target.seconds.value
-        // enviar la información a la función "dispatched" y convertirlo en entero
-        SetTargetSeconds(parseInt(seconds));
+  let parseForm = (event) => {
+    event.preventDefault();
+    let seconds = event.target.seconds.value;
+    setTargetSeconds(seconds);
+  };
+
+  useEffect(() => {
+    if (targetSeconds === null) {
+      return;
     }
 
-        if(targetSeconds !== null){
-            return (
-                <p>Soy un conteo hasta el {targetSeconds}</p>
-            )
-        }
-    
-    return (
-    <div>
+    setSeconds(0);
 
-    <p>¿Cuantos segundos quieres contar?</p>
-    
-    <form action='#' onSubmit={ ev => parseForm(ev) }>
-        <input type="number" name='seconds' />
-        <button>Iniciar</button>
-    </form>
+    const interval = setInterval(() => {
+      setSeconds((seconds) => seconds + 1);
+    }, 1000);
 
-    </div>
-  )
+    return () => clearInterval(interval);
+  }, [targetSeconds]);
+
+  if (targetSeconds === null) {
+    return(
+      <>
+        <p>¿Cuántos segundos quieres contar?</p>
+        <form action="#" onSubmit={ ev => parseForm(ev) }>
+          <input name="seconds" type="number" />
+          <button type="submit">Iniciar</button>
+        </form>
+      </>
+    )
+  }
+
+  if((seconds + 1) > targetSeconds){
+    return(
+      <>
+        <p>¡Terminó!</p>
+        <button onClick={ () => setTargetSeconds(null) }>Reiniciar!!</button>
+      </>
+    )
+  }
+
+  return(
+    <p>Quedan {targetSeconds - seconds} segundos</p>
+  );
 }
 
-export default CountDown;
+export default Countdown;
